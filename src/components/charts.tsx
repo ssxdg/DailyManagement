@@ -11,15 +11,13 @@ export function ExpenseCharts({ items, totalCents }: { items: ChartItem[]; total
   const barWidth = Math.max(180, width - 120);
   // 饼图最多呈现前五类，其余归入“其他”；完整分类仍在下方柱状图列出。
   const slices = items.length > 6 ? [...items.slice(0, 5), { id: 'combined', name: '其他分类', color: '#94A3B8', amountCents: items.slice(5).reduce((sum, item) => sum + item.amountCents, 0), percent: items.slice(5).reduce((sum, item) => sum + item.percent, 0) }] : items;
-  let progress = 0;
   const circumference = 2 * Math.PI * 58;
   return <View style={styles.stack}>
     <View style={styles.pieWrap}>
       <Svg width={160} height={160} viewBox="0 0 160 160">
-        {slices.map(item => {
+        {slices.map((item, index) => {
           const dash = circumference * item.percent / 100;
-          const offset = -circumference * progress / 100;
-          progress += item.percent;
+          const offset = -circumference * slices.slice(0, index).reduce((sum, previous) => sum + previous.percent, 0) / 100;
           return <Circle key={item.id} cx={80} cy={80} r={58} fill="none" stroke={item.color} strokeWidth={28} strokeDasharray={`${dash} ${circumference - dash}`} strokeDashoffset={offset} rotation={-90} origin="80,80" />;
         })}
       </Svg>

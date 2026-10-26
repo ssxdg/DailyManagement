@@ -17,7 +17,7 @@ export default function CategoriesScreen() {
   async function save() {
     if (!editing || !name.trim()) return Alert.alert('请输入分类名称');
     try { await saveCategory({ ...editing, name: name.trim() }); setEditing(null); await refresh(); }
-    catch (error) { Alert.alert('保存失败', '名称可能与现有分类重复，请检查后重试。'); }
+    catch { Alert.alert('保存失败', '名称可能与现有分类重复，请检查后重试。'); }
   }
   async function toggle(item: Category) {
     try { await saveCategory({ ...item, isActive: !item.isActive }); await refresh(); }

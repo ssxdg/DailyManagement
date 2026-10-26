@@ -8,7 +8,9 @@
     "icon": "./assets/images/icon.png",
     "scheme": "daily-management",
     "userInterfaceStyle": "light",
+    "ios": { "bundleIdentifier": "com.ssxdg.dailymanagement" },
     "android": {
+      "package": "com.ssxdg.dailymanagement",
       "adaptiveIcon": {
         "backgroundColor": "#F5F7F6",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
