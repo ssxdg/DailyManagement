@@ -5,7 +5,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { localDay, localTimestamp } from '@/lib/domain';
 
-export const colors = { background: '#F5F7F6', card: '#FFFFFF', text: '#18332F', muted: '#667B76', primary: '#087F69', border: '#DFE8E4', red: '#BA3B42', blue: '#3264B9' };
+export const colors = {
+  background: '#FFFAF1', card: '#FFFFFF', text: '#25352B', muted: '#766F62',
+  primary: '#1C765E', primarySoft: '#DFF1E5', yellow: '#FFE9AB',
+  purple: '#6C60A8', purpleSoft: '#EDE9FB', border: '#F0E5D3',
+  red: '#B9484D', blue: '#6C60A8',
+};
 
 export function Page({ children }: { children: React.ReactNode }) {
   return <SafeAreaView style={styles.safe} edges={['bottom']}><ScrollView contentContainerStyle={styles.page} keyboardShouldPersistTaps="handled">{children}</ScrollView></SafeAreaView>;
@@ -16,11 +21,11 @@ export function Title({ children, subtitle }: { children: React.ReactNode; subti
 }
 
 export function Card({ children, onPress, accent }: { children: React.ReactNode; onPress?: () => void; accent?: string }) {
-  return <Pressable onPress={onPress} disabled={!onPress} style={[styles.card, accent ? { borderLeftWidth: 4, borderLeftColor: accent } : null]}>{children}</Pressable>;
+  return <Pressable onPress={onPress} disabled={!onPress} style={({ pressed }) => [styles.card, accent ? { borderLeftWidth: 4, borderLeftColor: accent } : null, pressed && onPress && styles.pressed]}>{children}</Pressable>;
 }
 
 export function Button({ title, onPress, secondary, danger, disabled }: { title: string; onPress: () => void; secondary?: boolean; danger?: boolean; disabled?: boolean }) {
-  return <Pressable accessibilityRole="button" disabled={disabled} onPress={onPress} style={[styles.button, secondary && styles.secondaryButton, danger && styles.dangerButton, disabled && styles.disabled]}><Text style={[styles.buttonText, secondary && styles.secondaryButtonText]}>{title}</Text></Pressable>;
+  return <Pressable accessibilityRole="button" disabled={disabled} onPress={onPress} style={({ pressed }) => [styles.button, secondary && styles.secondaryButton, danger && styles.dangerButton, disabled && styles.disabled, pressed && styles.pressed]}><Text style={[styles.buttonText, secondary && styles.secondaryButtonText]}>{title}</Text></Pressable>;
 }
 
 export function Field({ label, ...props }: TextInputProps & { label: string }) {
@@ -51,27 +56,28 @@ export function SectionTitle({ children }: { children: React.ReactNode }) { retu
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  page: { padding: 20, paddingBottom: 40, gap: 16 },
-  titleBlock: { gap: 5, marginBottom: 4 },
-  title: { color: colors.text, fontSize: 27, fontWeight: '700' },
-  subtitle: { color: colors.muted, fontSize: 14, lineHeight: 21 },
-  card: { backgroundColor: colors.card, borderRadius: 20, borderWidth: 1, borderColor: colors.border, padding: 18, gap: 10 },
-  button: { minHeight: 48, borderRadius: 14, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 16 },
-  secondaryButton: { backgroundColor: '#E8F3EF' },
+  page: { width: '100%', maxWidth: 620, alignSelf: 'center', padding: 20, paddingBottom: 48, gap: 16 },
+  titleBlock: { gap: 6, marginBottom: 4 },
+  title: { color: colors.text, fontSize: 28, fontWeight: '800' },
+  subtitle: { color: colors.muted, fontSize: 13, lineHeight: 20 },
+  card: { backgroundColor: colors.card, borderRadius: 20, borderWidth: 1, borderColor: colors.border, padding: 17, gap: 10 },
+  button: { minHeight: 50, borderRadius: 16, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 16 },
+  secondaryButton: { backgroundColor: colors.primarySoft },
   dangerButton: { backgroundColor: colors.red },
   disabled: { opacity: 0.5 },
-  buttonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
+  pressed: { opacity: 0.75 },
+  buttonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '800' },
   secondaryButtonText: { color: colors.primary },
-  field: { gap: 8 },
+  field: { gap: 9 },
   label: { color: colors.text, fontSize: 15, fontWeight: '600' },
-  input: { minHeight: 48, borderRadius: 12, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: colors.border, paddingHorizontal: 14, fontSize: 16, color: colors.text },
+  input: { minHeight: 50, borderRadius: 14, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 15, fontSize: 16, color: colors.text },
   choices: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  choice: { minHeight: 44, paddingHorizontal: 14, justifyContent: 'center', borderRadius: 12, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: colors.border },
+  choice: { minHeight: 48, paddingHorizontal: 16, justifyContent: 'center', borderRadius: 12, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
   choiceActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   choiceText: { color: colors.text, fontSize: 14 },
   choiceTextActive: { color: '#FFFFFF', fontWeight: '700' },
   dateRow: { flexDirection: 'row', gap: 8 },
-  dateButton: { minHeight: 48, paddingHorizontal: 15, justifyContent: 'center', borderRadius: 12, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: colors.border },
+  dateButton: { minHeight: 50, paddingHorizontal: 15, justifyContent: 'center', borderRadius: 14, backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border },
   dateText: { color: colors.text, fontSize: 16 },
   done: { color: colors.primary, textAlign: 'right', fontSize: 16, padding: 8 },
   empty: { color: colors.muted, textAlign: 'center', paddingVertical: 28, lineHeight: 22 },

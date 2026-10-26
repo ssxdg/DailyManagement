@@ -8,7 +8,8 @@ type ChartItem = { id: string; name: string; color: string; amountCents: number;
 
 export function ExpenseCharts({ items, totalCents }: { items: ChartItem[]; totalCents: number }) {
   const { width } = useWindowDimensions();
-  const barWidth = Math.max(180, width - 120);
+  // 页面在平板上限制最大宽度，图表也按同一宽度计算，避免横向溢出。
+  const barWidth = Math.max(180, Math.min(width, 620) - 120);
   // 饼图最多呈现前五类，其余归入“其他”；完整分类仍在下方柱状图列出。
   const slices = items.length > 6 ? [...items.slice(0, 5), { id: 'combined', name: '其他分类', color: '#94A3B8', amountCents: items.slice(5).reduce((sum, item) => sum + item.amountCents, 0), percent: items.slice(5).reduce((sum, item) => sum + item.percent, 0) }] : items;
   const circumference = 2 * Math.PI * 58;
@@ -35,7 +36,7 @@ export function ExpenseCharts({ items, totalCents }: { items: ChartItem[]; total
 
 export function WeightTrend({ weights }: { weights: Weight[] }) {
   const { width } = useWindowDimensions();
-  const chartWidth = Math.max(220, width - 88);
+  const chartWidth = Math.max(220, Math.min(width, 620) - 88);
   const values = weights.slice(0, 20).reverse();
   if (values.length < 2) return null;
   const min = Math.min(...values.map(item => item.weightKg));
