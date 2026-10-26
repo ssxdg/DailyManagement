@@ -1,98 +1,47 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+import { Button, Card, colors, Page, Title } from '@/components/ui';
+import { getDatabase, listExpenses, listWeights } from '@/lib/database';
+import { formatCents, localDay } from '@/lib/domain';
 
 export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
-  );
+  const router = useRouter();
+  const [todayCents, setTodayCents] = useState(0);
+  const [latestWeight, setLatestWeight] = useState<number | null>(null);
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    getDatabase().then(() => Promise.all([listExpenses(), listWeights()])).then(([expenses, weights]) => {
+      if (!active) return;
+      setTodayCents(expenses.filter(item => item.occurredOn === localDay()).reduce((sum, item) => sum + item.amountCents, 0));
+      setLatestWeight(weights[0]?.weightKg ?? null);
+    }).catch(error => Alert.alert('读取首页数据失败', String(error)));
+    return () => { active = false; };
+  }, []));
+  return <Page>
+    <View style={styles.header}><Text style={styles.eyebrow}>DAILY MANAGEMENT</Text><Title subtitle="把每天的重要记录，留在自己手中。">日常管理</Title></View>
+    <Card onPress={() => router.push('/expenses')} accent={colors.primary}>
+      <Text style={styles.cardTitle}>消费管理</Text>
+      <Text style={styles.description}>快速记账 · 周月分类统计</Text>
+      <Text style={styles.metric}>今日支出  ¥ {formatCents(todayCents)}</Text>
+      <Text style={styles.link}>进入消费管理  →</Text>
+    </Card>
+    <Card onPress={() => router.push('/health')} accent={colors.blue}>
+      <Text style={styles.cardTitle}>健康管理</Text>
+      <Text style={styles.description}>记录每次饮食与称重，按时间回顾</Text>
+      <Text style={styles.metric}>最近体重  {latestWeight === null ? '尚未记录' : `${latestWeight} kg`}</Text>
+      <Text style={[styles.link, { color: colors.blue }]}>进入健康管理  →</Text>
+    </Card>
+    <Button title="周期设置与数据备份" secondary onPress={() => router.push('/settings')} />
+  </Page>;
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
+  header: { paddingTop: 34, paddingBottom: 10, gap: 8 },
+  eyebrow: { color: colors.primary, fontSize: 12, fontWeight: '800', letterSpacing: 2 },
+  cardTitle: { color: colors.text, fontSize: 23, fontWeight: '700' },
+  description: { color: colors.muted, fontSize: 14 },
+  metric: { color: colors.text, fontSize: 17, fontWeight: '600', marginTop: 18 },
+  link: { color: colors.primary, fontSize: 14, fontWeight: '700', marginTop: 6 },
 });
